@@ -5,16 +5,8 @@ export const todoProject = (() => {
     let projectItemCount = 0;
     function createProject(title, description){
         let nextProjectId = getNextProjectId();
-        localStorage.setItem(`project_${nextProjectId}`, stringifyProject({id: nextProjectId, title, description, items: getProjectItems()}));
+        localStorage.setItem(`project_${nextProjectId}`, JSON.stringify({id: nextProjectId, title, description, items: getProjectItems()}));
         return `project_${nextProjectId}`;
-    }
-
-    function stringifyProject(project){
-        return JSON.stringify(project);
-    }
-
-    function parseProjectString(projectString){
-        return JSON.parse(projectString);
     }
 
     function getProjectId(project){
@@ -29,17 +21,34 @@ export const todoProject = (() => {
         return [];
     }
 
-    function getProjectItem(project_id){
-        return localStorage.getItem(`project_${nextProjectId}`);
+    function getProjectObj(projectId){
+        return JSON.parse(localStorage.getItem(projectId));
     }
 
-    function addItemToProject(project, item){
+    function getProjectTitle(projectId){
+        return getProjectObj(projectId).title;
+    }
 
-        let toUpdateProject = JSON.parse(localStorage.getItem(project));
-        let toUpdateProjectId = getProjectId(toUpdateProject);
+    function updateProjectTitle(projectId, newTitle){
+        let projectObj = getProjectObj(projectId);
+        projectObj.title = newTitle;
+        localStorage.setItem(`item_${itemId}`, JSON.stringify(projectObj));
+    }
+
+    function getProjectDescription(projectId){
+        return getProjectObj(projectId).description;
+    }
+
+    function updateProjectDescription(projectId, newDescription){
+        let projectObj = getProjectObj(projectId);
+        projectObj.description= newDescription;
+        localStorage.setItem(`item_${itemId}`, JSON.stringify(projectObj));
+    }
+
+    function addItemToProject(projectId, item){
+        let toUpdateProject = getProjectObj(projectId);
         toUpdateProject.items.push(item);
-        let toUpdateProjectStr = stringifyProject(toUpdateProject);
-        localStorage.setItem(`project_${toUpdateProjectId}`, toUpdateProjectStr);
+        localStorage.setItem(projectId, JSON.stringify(toUpdateProject));
     }
 
     function deleteProject(projectId){
