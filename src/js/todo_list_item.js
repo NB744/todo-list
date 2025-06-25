@@ -3,7 +3,7 @@ export const todo_list_item = "To Do list Item";
 export const todoItem = (() => {
     
     let itemId = 1;
-    const priorities = ["low", "normal", "high"];
+    const priorities = ["Low", "Normal", "High"];
 
     function createItem(title, description, dueDate, priority, notes){
         let nextItemId = getNextItemId();
@@ -86,6 +86,7 @@ export const todoItem = (() => {
     return {
         createItem, 
         deleteItem,
+        getAllPriorities,
     }
 })();
 
