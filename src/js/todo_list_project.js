@@ -5,8 +5,14 @@ export const todoProject = (() => {
     let projectItemCount = 0;
     function createProject(title, description){
         let nextProjectId = getNextProjectId();
-        localStorage.setItem(`project_${nextProjectId}`, JSON.stringify({id: nextProjectId, title, description, items: getProjectItems()}));
+        let projects = getProjectsObj();
+        projects[`project_${nextProjectId}`] = {id: nextProjectId, title, description, items: getProjectItems()};
+        localStorage.setItem("projects", JSON.stringify(projects));
         return `project_${nextProjectId}`;
+    }
+
+    function getProjectsObj(){
+        return JSON.parse(localStorage.getItem("projects"));
     }
 
     function getProjectId(project){
@@ -18,7 +24,7 @@ export const todoProject = (() => {
     }
 
     function getProjectItems(project){
-        return [];
+        return {};
     }
 
     function getProjectObj(projectId){
@@ -26,33 +32,34 @@ export const todoProject = (() => {
     }
 
     function getProjectTitle(projectId){
-        return getProjectObj(projectId).title;
+        return getProjectsObj()[`${projectId}`].title;
     }
 
     function updateProjectTitle(projectId, newTitle){
-        let projectObj = getProjectObj(projectId);
-        projectObj.title = newTitle;
-        localStorage.setItem(`item_${itemId}`, JSON.stringify(projectObj));
+        let projects = getProjectsObj();
+        projects[`${projectId}`].title = newTitle;
+        localStorage.setItem(`item_${itemId}`, JSON.stringify(projects));
     }
 
     function getProjectDescription(projectId){
-        return getProjectObj(projectId).description;
+        return getProjectsObj()[`${projectId}`].description;
     }
 
     function updateProjectDescription(projectId, newDescription){
-        let projectObj = getProjectObj(projectId);
-        projectObj.description= newDescription;
-        localStorage.setItem(`item_${itemId}`, JSON.stringify(projectObj));
+        let projects = getProjectsObj();
+        projects[`${projectId}`].description = newDescription;
+        localStorage.setItem(`item_${itemId}`, JSON.stringify(projects));
     }
 
     function addItemToProject(projectId, item){
-        let toUpdateProject = getProjectObj(projectId);
-        toUpdateProject.items.push(item);
-        localStorage.setItem(projectId, JSON.stringify(toUpdateProject));
+        let projects = getProjectsObj();
+        projects[`${projectId}`].items[`${item}`] = item;
+        localStorage.setItem("projects", JSON.stringify(projects));       
     }
 
     function deleteProject(projectId){
-        localStorage.removeItem(`project_${projectId}`);
+        let projects = getAllProjects();
+        delete projects[`${projectId}`];
         console.log(`Deleted Project ${projectId}`);
     }
 
@@ -60,5 +67,6 @@ export const todoProject = (() => {
         createProject,
         deleteProject,
         addItemToProject,
+        getProjectObj,
     }
 })();

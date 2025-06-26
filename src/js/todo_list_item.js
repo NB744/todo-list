@@ -7,8 +7,14 @@ export const todoItem = (() => {
 
     function createItem(title, description, dueDate, priority, notes){
         let nextItemId = getNextItemId();
-        localStorage.setItem(`item_${nextItemId}`, JSON.stringify({id: nextItemId, title, description, dueDate, priority, notes}));
+        let items = getItemsObj();
+        items[`item_${nextItemId}`] = {id: nextItemId, title, description, dueDate, priority, notes};
+        localStorage.setItem("items", JSON.stringify(items));
         return `item_${nextItemId}`;
+    }
+
+    function getItemsObj(){
+        return JSON.parse(localStorage.getItem("items"));
     }
 
     function getAllPriorities(){
@@ -16,51 +22,43 @@ export const todoItem = (() => {
     }
 
     function getItemTitle(itemId){
-        let itemObj = getItemObj(itemId);
-        return itemObj.title;
+        return getItemsObj()[`${itemId}`].title;
     }
 
     function updateItemTitle(itemId, newTitle){
-        let itemObj = getItemObj(itemId);
-        itemObj.title = newTitle;
-        let toUpdateItemObj = JSON.stringify(itemObj);
-        localStorage.setItem(`item_${itemId}`, toUpdateItemObj);
+        let items = getItemsObj();
+        items[`${itemId}`].title = newTitle;
+        localStorage.setItem("items", JSON.parse(items));
     }
 
     function getItemPriority(itemId){
-        let itemObj = localStorage.getItem(`item_${itemId}`);
-        return itemObj.priority;
+        return getItemsObj()[`${itemId}`].priority;
     }
 
     function updateItemPriority(itemId, priority){
-        let itemObj = getItemObj(itemId);
-        itemObj.priority = priority;
-        let toUpdateItemObj = JSON.stringify(itemObj);
-        localStorage.setItem(`item_${itemId}`, toUpdateItemObj);
+        let items = getItemsObj();
+        items[`${itemId}`].priority = priority;
+        localStorage.setItem("items", JSON.parse(items));
     }
 
     function updateItemNote(itemId, newNote){
-        let itemObj = getItemObj(itemId);
-        itemObj.notes = newNote;
-        let toUpdateItemObj = JSON.stringify(itemObj);
-        localStorage.setItem(`item_${itemId}`, toUpdateItemObj);
+        let items = getItemsObj();
+        items[`${itemId}`].notes = newNote;
+        localStorage.setItem("items", JSON.parse(items));
     }
 
     function getItemDueDate(itemId){
-        let itemObj = getItemObj(itemId);
-        return itemObj.dueDate;
+        return getItemsObj()[`${itemId}`].dueDate;
     }
 
     function updateItemDueDate(itemId, newDueDate){
-        let itemObj = getItemObj(itemId);
-        itemObj.dueDate = newDueDate;
-        let toUpdateItemObj = JSON.stringify(itemObj);
-        localStorage.setItem(`item_${itemId}`, toUpdateItemObj);
+        let items = getItemsObj();
+        items[`${itemId}`].dueDate = newDueDate;
+        localStorage.setItem("items", JSON.parse(items));
     }
 
     function getItemDescription(itemId){
-        let itemObj = getItemObj(itemId);
-        return itemObj.description;
+        return getItemsObj()[`${itemId}`].description;
     }
 
     function updateItemDescription(itemId, newDescription){
