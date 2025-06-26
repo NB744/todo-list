@@ -31,19 +31,24 @@ const todoListApp = (() => {
             
         });
 
-
         document.addEventListener('click', function(e){
             const itemTarget = e.target.closest("#add-item-submit");
 
             if(itemTarget && validateItemSubmitHandler()){
                 console.log("NIS ADD ITEM CLICKED");
                 addItemSubmitHandler();
+                clearContent();
+                document.querySelector("#content").appendChild(getAddItemFormContent());
             }
 
             const projectTarget = e.target.closest("#add-project-submit");
             if(projectTarget && validateProjectSubmitHandler()){
                 console.log("NIS ADD PROJECT CLICKED");
                 addProjectSubmitHandler();
+                clearContent();
+                document.querySelector("#content").appendChild(getAddProjectFormContent());
+                renderProjectsList();
+                
             }
 
             const projectEditTarget = e.target.closest("#edit-project")
@@ -60,14 +65,40 @@ const todoListApp = (() => {
                 document.querySelector("#content").appendChild(getAddItemFormContent());
             }
         });
+    }
 
-
+    function renderProjectsList(){
+        document.querySelector("#projects-list-container").textContent = "";
+        document.querySelector("#projects-list-container").appendChild(displayProjects());
     }
 
     function displayProjects(){
-        clearContent();
-
-        document.querySelector('#content').appendChild
+        let projects = JSON.parse(localStorage.getItem("projects"));
+        console.log(projects);
+        if(Object.keys(projects).length){
+            //let projectsDetailsElem = document.createElement("details");
+            //let projectsSummaryElem = document.createElement("summary");
+            //projectsDetailsElem.append(projectsSummaryElem);
+            let projectsListElem = document.createElement("ul");
+            for(let eachProject in projects){
+                const eachProjectObj = projects[eachProject];
+                let eachProjectListElem = document.createElement("li");
+                const eachProjectTitle = eachProjectObj.title;
+                const eachProjectDesc = eachProjectObj.description;
+                if(eachProjectDesc.trim() !== ""){
+                    eachProjectListElem.textContent = `${eachProjectTitle} - ${eachProjectDesc}`;
+                }else{
+                    eachProjectListElem.textContent = `${eachProjectTitle}`;
+                }
+                
+                projectsListElem.appendChild(eachProjectListElem);
+            }
+            return projectsListElem;
+        }else{
+            let noProjects = document.createElement("span");
+            noProjects.textContent = "No Projects found!";
+            return noProjects;
+        }
     }
 
     function validateItemSubmitHandler(){
@@ -91,11 +122,6 @@ const todoListApp = (() => {
         let itemDueDate = document.getElementById("item_due_date").value;
         let itemPriority = document.getElementById("item_priority").value;
         let itemNotes = document.getElementById("item_notes").value;
-        console.log(itemName);
-        console.log(itemDesc);
-        console.log(itemDueDate);
-        console.log(itemPriority);
-        console.log(itemNotes);
         // Create Item.
         todoItem.createItem(itemName,itemDesc,itemDueDate,itemPriority,itemNotes);
         // Add message.
@@ -106,8 +132,6 @@ const todoListApp = (() => {
         // Get the input from the form.
         let projectName = document.getElementById("project_name").value;
         let projectDesc = document.getElementById("project_desc").value;
-        console.log(projectName);
-        console.log(projectDesc);
         // Create Project.
         todoProject.createProject(projectName, projectDesc);
         //Display message.
@@ -115,7 +139,7 @@ const todoListApp = (() => {
     }
 
     function displayMessage(message){
-        document.querySelector("#message_container").textContent = message;
+        document.querySelector("#message-container").textContent = message;
     }
 
     function getAddProjectFormContent(update = false, updateProjectId = undefined){
@@ -174,7 +198,7 @@ const todoListApp = (() => {
         itemFormDiv.setAttribute('id', 'add-item-form');
 
         let itemForm = document.createElement("form");
-        itemForm.setAttribute('onsubmit', 'return false');
+        //itemForm.setAttribute('onsubmit', 'return false');
 
         let itemFormNameLabel = document.createElement("label");
         itemFormNameLabel.setAttribute('for', 'item_name');
@@ -254,30 +278,36 @@ const todoListApp = (() => {
         addItemSubmitHandler,
         addProjectSubmitHandler,
         initializeStorage,
+        renderProjectsList,
     }
 })();
 
 
 todoListApp.initializeStorage();
+todoListApp.renderProjectsList();
 todoListApp.bindToDoListAppButtonEventHandlers();
-let nis1 = todoItem.createItem("Nischal Test Item 1", "This is a test", "06-26-2025", "high", "This is a test Note");
-let nis2 = todoItem.createItem("Nischal Test Item 2", "This is a test", "06-26-2025", "high", "This is a test Note");
-let nis3 = todoItem.createItem("Nischal Test Item 3", "This is a test", "06-26-2025", "high", "This is a test Note");
-let nis4 = todoItem.createItem("Nischal Test Item 4", "This is a test", "06-26-2025", "high", "This is a test Note");
-let nis5 = todoItem.createItem("Nischal Test Item 5", "This is a test", "06-26-2025", "high", "This is a test Note");
 
 
-let nisProject1 = todoProject.createProject("Nischal Project 1", "Test Project");
-let nisProject2 = todoProject.createProject("Nischal Project 2", "Test Project");
 
 
-todoProject.addItemToProject(nisProject1, nis1);
-todoProject.addItemToProject(nisProject1, nis2);
-todoProject.addItemToProject(nisProject1, nis5);
+// let nis1 = todoItem.createItem("Nischal Test Item 1", "This is a test", "06-26-2025", "high", "This is a test Note");
+// let nis2 = todoItem.createItem("Nischal Test Item 2", "This is a test", "06-26-2025", "high", "This is a test Note");
+// let nis3 = todoItem.createItem("Nischal Test Item 3", "This is a test", "06-26-2025", "high", "This is a test Note");
+// let nis4 = todoItem.createItem("Nischal Test Item 4", "This is a test", "06-26-2025", "high", "This is a test Note");
+// let nis5 = todoItem.createItem("Nischal Test Item 5", "This is a test", "06-26-2025", "high", "This is a test Note");
 
-todoProject.addItemToProject(nisProject2, nis3);
-todoProject.addItemToProject(nisProject2, nis4);
 
-// console.log(localStorage);
-console.log(JSON.parse(localStorage.getItem("items")));
-console.log(JSON.parse(localStorage.getItem("projects")));
+// let nisProject1 = todoProject.createProject("Nischal Project 1", "Test Project");
+// let nisProject2 = todoProject.createProject("Nischal Project 2", "Test Project");
+
+
+// todoProject.addItemToProject(nisProject1, nis1);
+// todoProject.addItemToProject(nisProject1, nis2);
+// todoProject.addItemToProject(nisProject1, nis5);
+
+// todoProject.addItemToProject(nisProject2, nis3);
+// todoProject.addItemToProject(nisProject2, nis4);
+
+// // console.log(localStorage);
+// console.log(JSON.parse(localStorage.getItem("items")));
+// console.log(JSON.parse(localStorage.getItem("projects")));
