@@ -50,27 +50,78 @@ const todoListApp = (() => {
             
         });
 
+        document.addEventListener('click', function(e){
+            const itemTarget = e.target.closest("#add-item-submit");
 
+            if(itemTarget && validateItemSubmitHandler()){
+                console.log("NIS ADD ITEM CLICKED");
+                addItemSubmitHandler();
+            }
+
+            const projectTarget = e.target.closest("#add-project-submit");
+            if(projectTarget && validateProjectSubmitHandler()){
+                console.log("NIS ADD PROJECT CLICKED");
+                addProjectSubmitHandler();
+            }
+        });
+
+
+    }
+
+    function validateItemSubmitHandler(){
+        if(document.getElementById("item_name").value && document.getElementById("item_due_date").value){
+            return true;
+        }
+        return false;
+    }
+
+    function validateProjectSubmitHandler(){
+        if(document.getElementById("project_name").value){
+            return true;
+        }
+        return false;
     }
 
     function addItemSubmitHandler(){
-        document.querySelector("#add-item-submit").addEventListener('click', () =>{
-                console.log("SUBMIT ADD ITEM");
-        });
+        // Get the input from the form.
+        let itemName = document.getElementById("item_name").value;
+        let itemDesc = document.getElementById("item_desc").value;
+        let itemDueDate = document.getElementById("item_due_date").value;
+        let itemPriority = document.getElementById("item_priority").value;
+        let itemNotes = document.getElementById("item_notes").value;
+        console.log(itemName);
+        console.log(itemDesc);
+        console.log(itemDueDate);
+        console.log(itemPriority);
+        console.log(itemNotes);
+        // Create Item.
+        todoItem.createItem(itemName,itemDesc,itemDueDate,itemPriority,itemNotes);
+        // Add message.
+        displayMessage(`Success! Added new item ${itemName}`);
     }
 
     function addProjectSubmitHandler(){
-        document.querySelector("#add-project-submit").addEventListener('click', () =>{
-                console.log("SUBMIT ADD PROJECT");
-        });
+        // Get the input from the form.
+        let projectName = document.getElementById("project_name").value;
+        let projectDesc = document.getElementById("project_desc").value;
+        console.log(projectName);
+        console.log(projectDesc);
+        // Create Project.
+        todoProject.createProject(projectName, projectDesc);
+        //Display message.
+        displayMessage(`Success! Added new project ${projectName}`);
     }
 
+    function displayMessage(message){
+        document.querySelector("#message_container").textContent = message;
+    }
 
     function getAddProjectFormContent(){
         let projectFormDiv = document.createElement("div");
         projectFormDiv.setAttribute('id', 'add-project-form');
 
         let projectForm = document.createElement("form");
+        projectForm.setAttribute('onsubmit', 'return false');
 
         let projectFormNameLabel = document.createElement("label");
         projectFormNameLabel.setAttribute('for', 'project_name');
@@ -79,6 +130,7 @@ const todoListApp = (() => {
         projectFormNameInput.setAttribute('id', 'project_name');
         projectFormNameInput.setAttribute('name', 'project_name');
         projectFormNameInput.setAttribute('type', 'text');
+        projectFormNameInput.required = true;
         projectForm.appendChild(projectFormNameLabel);
         projectForm.appendChild(projectFormNameInput);
 
@@ -91,11 +143,10 @@ const todoListApp = (() => {
         projectForm.appendChild(projectFormDescLabel);
         projectForm.appendChild(projectFormDescInput);
         
-        let projectFormSubmit = document.createElement("button");
-        projectFormSubmit.setAttribute('type', 'button');
+        let projectFormSubmit = document.createElement("input");
+        projectFormSubmit.setAttribute('type', 'submit');
         projectFormSubmit.setAttribute('id', 'add-project-submit');
-        projectFormSubmit.setAttribute('onclick', 'addProjectSubmitHandler()');
-        projectFormSubmit.textContent = 'Add Project';
+        projectFormSubmit.setAttribute('value','Add Project');
         projectForm.appendChild(projectFormSubmit);
 
         projectFormDiv.appendChild(projectForm);
@@ -108,6 +159,7 @@ const todoListApp = (() => {
         itemFormDiv.setAttribute('id', 'add-item-form');
 
         let itemForm = document.createElement("form");
+        itemForm.setAttribute('onsubmit', 'return false');
 
         let itemFormNameLabel = document.createElement("label");
         itemFormNameLabel.setAttribute('for', 'item_name');
@@ -116,6 +168,7 @@ const todoListApp = (() => {
         itemFormNameInput.setAttribute('id', 'item_name');
         itemFormNameInput.setAttribute('name', 'item_name');
         itemFormNameInput.setAttribute('type', 'text');
+        itemFormNameInput.required = true;
         itemForm.appendChild(itemFormNameLabel);
         itemForm.appendChild(itemFormNameInput);
 
@@ -135,6 +188,7 @@ const todoListApp = (() => {
         itemFormDueDateInput.setAttribute('id', 'item_due_date');
         itemFormDueDateInput.setAttribute('name', 'item_due_date');
         itemFormDueDateInput.setAttribute('type', 'date');
+        itemFormDueDateInput.required = true;
         itemForm.appendChild(itemFormDueDateLabel);
         itemForm.appendChild(itemFormDueDateInput);
         
@@ -151,14 +205,23 @@ const todoListApp = (() => {
         }
         itemFormPriorityInput.setAttribute('id', 'item_priority');
         itemFormPriorityInput.setAttribute('name', 'item_priority');
+        itemFormPriorityInput.required = true;
         itemForm.appendChild(itemFormPriorityLabel);
         itemForm.appendChild(itemFormPriorityInput);
 
-        let itemFormSubmit = document.createElement("button");
-        itemFormSubmit.setAttribute('type', 'button');
+        let itemNotesLabel = document.createElement("label");
+        itemNotesLabel.setAttribute('for', 'item_notes');
+        itemNotesLabel.textContent = "Project Notes:";
+        let itemNotesInput = document.createElement("textarea");
+        itemNotesInput.setAttribute('id', 'item_notes');
+        itemNotesInput.setAttribute('name', 'item_notes');
+        itemForm.appendChild(itemNotesLabel);
+        itemForm.appendChild(itemNotesInput);
+
+        let itemFormSubmit = document.createElement("input");
+        itemFormSubmit.setAttribute('type', 'submit');
         itemFormSubmit.setAttribute('id', 'add-item-submit');
-        itemFormSubmit.setAttribute('onclick', 'addItemSubmitHandler()');
-        itemFormSubmit.textContent = 'Add Item';
+        itemFormSubmit.setAttribute('value', 'Add Item');
         itemForm.appendChild(itemFormSubmit);
         
         itemFormDiv.appendChild(itemForm);
