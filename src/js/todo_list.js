@@ -33,37 +33,66 @@ const todoListApp = (() => {
 
         document.addEventListener('click', function(e){
             const itemTarget = e.target.closest("#add-item-submit");
-
             if(itemTarget && validateItemSubmitHandler()){
-                console.log("NIS ADD ITEM CLICKED");
-                addItemSubmitHandler();
-                clearContent();
+                let isItemUpdate = e.target.getAttribute('data-is-update');
+                if(isItemUpdate === "true"){
+                    let toUpdateItemId = e.target.getAttribute('data-item-id');
+                    updateItemSubmitHandler(toUpdateItemId);
+                }else{
+                    addItemSubmitHandler();
+                    clearContent();
+                }
+                
                 document.querySelector("#content").appendChild(getAddItemFormContent());
             }
 
             const projectTarget = e.target.closest("#add-project-submit");
             if(projectTarget && validateProjectSubmitHandler()){
-                console.log("NIS ADD PROJECT CLICKED");
-                addProjectSubmitHandler();
-                clearContent();
-                document.querySelector("#content").appendChild(getAddProjectFormContent());
+                let isProjectUpdate = e.target.getAttribute('data-is-update');
+                if(isProjectUpdate === "true"){
+                    let toUpdateProjectId = e.target.getAttribute('data-project-id');
+                    updateProjectSubmitHandler(toUpdateProjectId);
+                }else{
+                    addProjectSubmitHandler();
+                    clearContent();
+                    document.querySelector("#content").appendChild(getAddProjectFormContent());
+                }
+                
                 renderProjectsList();
                 
             }
 
-            const projectEditTarget = e.target.closest("#edit-project")
+            const projectEditTarget = e.target.closest(".edit-project-btn")
             if(projectEditTarget){
                 console.log("EDIT PROJECT");
+                clearContent();
+                let toEditProjectId = e.target.getAttribute('data-project-id');
+                console.log(toEditProjectId);
+                document.querySelector("#content").appendChild(getAddProjectFormContent(true, toEditProjectId));
+            }
+
+            const projectDeleteTarget = e.target.closest(".delete-project-btn")
+            if(projectDeleteTarget){
+                console.log("DELETE PROJECT");
                 clearContent();
                 //document.querySelector("#content").appendChild(getAddProjectFormContent(edit, ));   
             }
 
-            const itemEditTarget = e.target.closest("#edit-item");
+            const itemEditTarget = e.target.closest(".edit-item-btn");
             if(itemEditTarget){
                 console.log("EDIT ITEM");
                 clearContent();
-                document.querySelector("#content").appendChild(getAddItemFormContent());
+                //document.querySelector("#content").appendChild(getAddItemFormContent());
             }
+
+            const itemDeleteTarget = e.target.closest(".delete-item-btn");
+            if(itemDeleteTarget){
+                console.log("DELETE ITEM");
+                clearContent();
+                //document.querySelector("#content").appendChild(getAddItemFormContent());
+            }
+
+
         });
     }
 
@@ -83,14 +112,45 @@ const todoListApp = (() => {
             for(let eachProject in projects){
                 const eachProjectObj = projects[eachProject];
                 let eachProjectListElem = document.createElement("li");
+
+                let eachProjectListElemContainer = document.createElement("div");
+                eachProjectListElemContainer.classList.add("each-project-list-container");
+                
+                let eachProjectDataContainer = document.createElement("div");
+                eachProjectDataContainer.classList.add("each-project-data-container");
+                
+                const eachProjectId = eachProjectObj.id;
                 const eachProjectTitle = eachProjectObj.title;
                 const eachProjectDesc = eachProjectObj.description;
-                if(eachProjectDesc.trim() !== ""){
-                    eachProjectListElem.textContent = `${eachProjectTitle} - ${eachProjectDesc}`;
-                }else{
-                    eachProjectListElem.textContent = `${eachProjectTitle}`;
-                }
                 
+                let eachProjectActionContainer = document.createElement("div");
+                eachProjectActionContainer.classList.add("each-project-action-container");
+
+                let eachProjectEditBtn = document.createElement("button");
+                eachProjectEditBtn.setAttribute('id', `edit-project-${eachProjectId}-btn`);
+                eachProjectEditBtn.classList.add('edit-project-btn');
+                eachProjectEditBtn.setAttribute('data-project-id', eachProjectId);
+                eachProjectEditBtn.textContent = "Edit Project";
+
+                let eachProjectDeleteBtn = document.createElement("button");
+                eachProjectDeleteBtn.setAttribute('id', `delete-project-${eachProjectId}-btn`);
+                eachProjectDeleteBtn.classList.add('delete-project-btn');
+                eachProjectDeleteBtn.setAttribute('data-project-id', eachProjectId);
+                eachProjectDeleteBtn.textContent = "Delete Project";
+                
+                eachProjectActionContainer.appendChild(eachProjectEditBtn);
+                eachProjectActionContainer.appendChild(eachProjectDeleteBtn);
+                
+                if(eachProjectDesc.trim() !== ""){
+                    eachProjectDataContainer.textContent = `${eachProjectTitle} - ${eachProjectDesc}`;
+                    
+                }else{
+                    eachProjectDataContainer.textContent = `${eachProjectTitle}`;
+                    //eachProjectListElem.textContent = `${eachProjectTitle}`;
+                }
+
+                eachProjectListElem.appendChild(eachProjectDataContainer);
+                eachProjectListElem.appendChild(eachProjectActionContainer);
                 projectsListElem.appendChild(eachProjectListElem);
             }
             return projectsListElem;
@@ -99,6 +159,10 @@ const todoListApp = (() => {
             noProjects.textContent = "No Projects found!";
             return noProjects;
         }
+    }
+
+    function displayItemsInProject(project){
+
     }
 
     function validateItemSubmitHandler(){
@@ -122,10 +186,32 @@ const todoListApp = (() => {
         let itemDueDate = document.getElementById("item_due_date").value;
         let itemPriority = document.getElementById("item_priority").value;
         let itemNotes = document.getElementById("item_notes").value;
-        // Create Item.
-        todoItem.createItem(itemName,itemDesc,itemDueDate,itemPriority,itemNotes);
+        let itemProjectElem = document.getElementById("item_project");
+
+        if(itemProjectElem){
+            console.log(`ITEM PROJECT IS: ${itemProjectElem}`);
+            let itemProjectData = itemProjectElem.value;
+            let itemProjectId = itemProjectData.split("-")[0];
+            console.log(`PROJECT ID FOR ITEM IS ${itemProjectId}`);
+        }else{
+            // Create Item.
+            todoItem.createItem(itemName,itemDesc,itemDueDate,itemPriority,itemNotes);
+        }
         // Add message.
         displayMessage(`Success! Added new item ${itemName}`);
+    }
+
+    function updateItemSubmitHandler(itemId){
+        // Get the input from the form.
+        let itemName = document.getElementById("item_name").value;
+        let itemDesc = document.getElementById("item_desc").value;
+        let itemDueDate = document.getElementById("item_due_date").value;
+        let itemPriority = document.getElementById("item_priority").value;
+        let itemNotes = document.getElementById("item_notes").value;
+        // Create Item.
+        todoItem.updateItem(itemId, itemName,itemDesc,itemDueDate,itemPriority,itemNotes);
+        // Add message.
+        displayMessage(`Success! Updated item ${itemName}`);
     }
 
     function addProjectSubmitHandler(){
@@ -136,6 +222,16 @@ const todoListApp = (() => {
         todoProject.createProject(projectName, projectDesc);
         //Display message.
         displayMessage(`Success! Added new project ${projectName}`);
+    }
+
+    function updateProjectSubmitHandler(projectId){
+        // Get the input from the form.
+        let projectName = document.getElementById("project_name").value;
+        let projectDesc = document.getElementById("project_desc").value;
+        // Create Project.
+        todoProject.updateProject(projectId, projectName, projectDesc);
+        //Display message.
+        displayMessage(`Success! Updated project ${projectName}`);
     }
 
     function displayMessage(message){
@@ -173,6 +269,7 @@ const todoListApp = (() => {
         projectFormSubmit.setAttribute('type', 'submit');
         projectFormSubmit.setAttribute('id', 'add-project-submit');
         projectFormSubmit.setAttribute('value','Add Project');
+        projectFormSubmit.setAttribute('data-is-update', false);
         projectForm.appendChild(projectFormSubmit);
 
         //let projectEditBtn = document.createElement("button");
@@ -183,22 +280,26 @@ const todoListApp = (() => {
         
 
         if(update){
-            let toUpdateProject = todoProject.getProjectObj(toUpdateProject);
+            let projects = JSON.parse(localStorage.getItem("projects"));
+            let toUpdateProject = projects[`project_${updateProjectId}`];
+            console.log(toUpdateProject);
             let toUpdateProjectName = toUpdateProject.title;
-            let toUpdateProjectDesc = toUpdateProject.itemDesc;
+            let toUpdateProjectDesc = toUpdateProject.description;
             let toUpdateProjectItems = toUpdateProject.items;
-            projectFormNameInput.textContent = toUpdateProjectName;
-            projectFormDescInput.textContent = toUpdateProjectDesc;
+            projectFormNameInput.value = toUpdateProjectName;
+            projectFormDescInput.value = toUpdateProjectDesc;
+            projectFormSubmit.setAttribute('data-is-update', true);
+            projectFormSubmit.setAttribute('data-project-id', toUpdateProject.id);
         }
         return projectFormDiv;
     }
 
-    function getAddItemFormContent(edit = false){
+    function getAddItemFormContent(update = false, updateItemId = undefined){
         let itemFormDiv = document.createElement("div");
         itemFormDiv.setAttribute('id', 'add-item-form');
 
         let itemForm = document.createElement("form");
-        //itemForm.setAttribute('onsubmit', 'return false');
+        itemForm.setAttribute('onsubmit', 'return false');
 
         let itemFormNameLabel = document.createElement("label");
         itemFormNameLabel.setAttribute('for', 'item_name');
@@ -257,20 +358,89 @@ const todoListApp = (() => {
         itemForm.appendChild(itemNotesLabel);
         itemForm.appendChild(itemNotesInput);
 
+        let allProjects = getAllProjects();
+        if(Object.keys(allProjects).length > 0){
+            let itemFormProjectLabel = document.createElement("label");
+            itemFormProjectLabel.setAttribute('for', 'item_project');
+            itemFormProjectLabel.textContent = "Project:";
+            let itemFormProjectInput = document.createElement("select");
+            for(const eachProject in allProjects){
+                let eachProjectObj = allProjects[`${eachProject}`];
+                let eachProjectOptionElem = document.createElement("option");
+                eachProjectOptionElem.textContent = `${eachProjectObj.id} - ${eachProjectObj.title}`;
+                itemFormProjectInput.appendChild(eachProjectOptionElem); 
+            }
+            itemFormProjectInput.setAttribute('id', 'item_project');
+            itemFormProjectInput.setAttribute('name', 'item_project');
+            itemForm.appendChild(itemFormProjectLabel);
+            itemForm.appendChild(itemFormProjectInput);
+
+            if(update){
+                let toUpdateItemProject = getProjectOfItem();
+                if(toUpdateItemProject){
+                    let toUpdateItemProjectId = getAllProjects().toUpdateItemProject.id;
+                    let toUpdateItemProjectTitle = getAllProjects().toUpdateItemProject.title;
+                    itemFormProjectInput.value = `${toUpdateItemProjectId} - ${toUpdateItemProjectTitle}`;
+                }
+            }
+        }
+        
+
         let itemFormSubmit = document.createElement("input");
         itemFormSubmit.setAttribute('type', 'submit');
         itemFormSubmit.setAttribute('id', 'add-item-submit');
         itemFormSubmit.setAttribute('value', 'Add Item');
         itemForm.appendChild(itemFormSubmit);
-        
+
+
         itemFormDiv.appendChild(itemForm);
+
+        if(update){
+            let items = JSON.parse(localStorage.getItem("items"));
+            let toUpdateItem = items[`item_${updateItemId}`];
+            console.log(toUpdateItem);
+            let toUpdateProjectName = toUpdateItem.title;
+            let toUpdateProjectDesc = toUpdateItem.description;
+            let toUpdateItemDueDate = toUpdateItem.dueDate;
+            let toUpdateItemPriority = toUpdateItem.priority;
+            let toUpdateItemNotes = toUpdateItem.notes;
+            projectFormNameInput.value = toUpdateProjectName;
+            projectFormDescInput.value = toUpdateProjectDesc;
+            itemFormDueDateInput.value = toUpdateItemDueDate;
+            itemFormPriorityInput.value = toUpdateItemPriority;
+            itemNotesInput.value = toUpdateItemNotes;
+            projectFormSubmit.setAttribute('data-is-update', true);
+            projectFormSubmit.setAttribute('data-project-id', toUpdateItem);
+        }
         
         return itemFormDiv;
+    }
+
+    function getProjectOfItem(itemId){
+        let allProjects = getAllProjects();
+        for (let eachProject in allProjects){
+            let eachProjectObj = allProjects[eachProject];
+            let eachProjectObjItems = eachProjectObj.items;
+            for(eachItem in eachProjectObjItems){
+                if(eachItem === itemId){
+                    return eachProject;
+                }
+            }
+        }
+        return false;
     }
 
     function initializeStorage(){
         localStorage.setItem("items", JSON.stringify(allItems));
         localStorage.setItem("projects", JSON.stringify(allProjects));
+    }
+
+    function getAllProjects(){
+        return JSON.parse(localStorage.getItem("projects"));
+    }
+
+    function getAllItems(){
+        return JSON.parse(localStorage.getItem("items"));
     }
 
     return{

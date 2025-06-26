@@ -13,6 +13,13 @@ export const todoItem = (() => {
         return `item_${nextItemId}`;
     }
 
+    function updateItem(id, title, description, dueDate, priority, notes){
+        let items = getItemsObj();
+        items[`item_${id}`] = {id, title, description, dueDate, priority, notes};
+        localStorage.setItem("items", JSON.stringify(items));
+        return `item_${id}`;
+    }
+
     function getItemsObj(){
         return JSON.parse(localStorage.getItem("items"));
     }
@@ -85,6 +92,7 @@ export const todoItem = (() => {
         createItem, 
         deleteItem,
         getAllPriorities,
+        updateItem,
     }
 })();
 
