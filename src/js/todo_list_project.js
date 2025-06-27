@@ -65,8 +65,9 @@ export const todoProject = (() => {
     }
 
     function deleteProject(projectId){
-        let projects = getAllProjects();
-        delete projects[`${projectId}`];
+        let projects = JSON.parse(localStorage.getItem("projects"));
+        delete projects.projectId;
+        localStorage.setItem("projects", JSON.stringify(projects));
         console.log(`Deleted Project ${projectId}`);
     }
 
