@@ -41,9 +41,9 @@ const todoListApp = (() => {
                 }else{
                     addItemSubmitHandler();
                     clearContent();
+                    document.querySelector("#content").appendChild(getAddItemFormContent());
                 }
-                
-                document.querySelector("#content").appendChild(getAddItemFormContent());
+                renderItemsList();
             }
 
             const projectTarget = e.target.closest("#add-project-submit");
@@ -91,9 +91,47 @@ const todoListApp = (() => {
                 clearContent();
                 //document.querySelector("#content").appendChild(getAddItemFormContent());
             }
+            
 
+            const itemClickTarget = e.target.closest("#items-list-ul");
+            if(itemClickTarget){
+                console.log("Item Clicked");
+                let clickedItemId = e.target.getAttribute("data-item-key");
+                console.log(clickedItemId);
+                renderObj("item", clickedItemId);
+            }
 
         });
+    }
+
+    function renderObj(objType, objId){
+        let renderDiv = document.createElement("div");
+        renderDiv.classList.add("render-container");
+
+        let renderHeaderDiv = document.createElement("div");
+        renderHeaderDiv.classList.add("render-header-container");
+
+        let renderBodyDiv = document.createElement("div");
+        renderHeaderDiv.classList.add("render-body-container");
+
+        if(objType === "item"){
+            let itemObj = getAllItems()[`${objId}`];
+            let itemName = itemObj.title;
+            let itemDescription = itemObj.description;
+            let itemDueDate = itemObj.dueDate;
+            let itemPriority = itemObj.priority;
+            let itemNotes = itemObj.description;
+            let itemProjectId = getProjectOfItem();
+            if(itemProjectId !== false){
+                let projectObj = getAllProjects()[`${itemProjectId}`];
+                let itemProjectName = projectObj.title;
+            }
+
+        }else if(objType === "project"){
+            let projectObj = getAllProjects()[`${objId}`];
+            let projectName = projectObj.title;
+            let projectDescription = itemObj.description;
+        }
     }
 
     function renderProjectsList(){
@@ -101,9 +139,43 @@ const todoListApp = (() => {
         document.querySelector("#projects-list-container").appendChild(displayProjects());
     }
 
+    function renderItemsList(){
+        document.querySelector("#items-list-container").textContent = "";
+        document.querySelector("#items-list-container").appendChild(displayItems());
+    }
+
+    function displayItems(){
+        let items = getAllItems();
+        if(Object.keys(items).length){
+            let itemsListElem = document.createElement("ul");
+            itemsListElem.setAttribute('id', 'items-list-ul');
+            for(let eachItem in items){
+                const eachItemObj = items[eachItem];
+                let eachItemListElem = document.createElement("li");
+                //let eachItemDiv = document.createElement("div");
+                //eachItemDiv.classList.add("each-item-list-container");
+                console.log(eachItemObj);
+
+                const eachItemId = eachItemObj.id;
+                const eachItemName = eachItemObj.title;
+                console.log(eachItemName);
+
+                eachItemListElem.textContent = eachItemName;
+                eachItemListElem.setAttribute('id', `item-${eachItemId}`);
+                eachItemListElem.setAttribute('data-item-key', eachItem);
+
+                itemsListElem.appendChild(eachItemListElem);
+            }
+            return itemsListElem;
+        }else{
+            let noItems = document.createElement("span");
+            noItems.textContent = "No Items found!";
+            return noItems;
+        }
+    }
+
     function displayProjects(){
-        let projects = JSON.parse(localStorage.getItem("projects"));
-        console.log(projects);
+        let projects = getAllProjects();
         if(Object.keys(projects).length){
             //let projectsDetailsElem = document.createElement("details");
             //let projectsSummaryElem = document.createElement("summary");
@@ -187,16 +259,16 @@ const todoListApp = (() => {
         let itemPriority = document.getElementById("item_priority").value;
         let itemNotes = document.getElementById("item_notes").value;
         let itemProjectElem = document.getElementById("item_project");
-
+        let addedItem = todoItem.createItem(itemName,itemDesc,itemDueDate,itemPriority,itemNotes);
         if(itemProjectElem){
-            console.log(`ITEM PROJECT IS: ${itemProjectElem}`);
-            let itemProjectData = itemProjectElem.value;
-            let itemProjectId = itemProjectData.split("-")[0];
+            //console.log(`ITEM PROJECT IS: ${itemProjectElem}`);
+            let itemProjectId = itemProjectElem.value;
+            
+            //let itemProjectId = itemProjectData.split("-")[0];
             console.log(`PROJECT ID FOR ITEM IS ${itemProjectId}`);
-        }else{
-            // Create Item.
-            todoItem.createItem(itemName,itemDesc,itemDueDate,itemPriority,itemNotes);
+            todoProject.addItemToProject(itemProjectId, addedItem);
         }
+
         // Add message.
         displayMessage(`Success! Added new item ${itemName}`);
     }
@@ -367,7 +439,8 @@ const todoListApp = (() => {
             for(const eachProject in allProjects){
                 let eachProjectObj = allProjects[`${eachProject}`];
                 let eachProjectOptionElem = document.createElement("option");
-                eachProjectOptionElem.textContent = `${eachProjectObj.id} - ${eachProjectObj.title}`;
+                eachProjectOptionElem.setAttribute('value', `project_${eachProjectObj.id}`)
+                eachProjectOptionElem.textContent = eachProjectObj.title;
                 itemFormProjectInput.appendChild(eachProjectOptionElem); 
             }
             itemFormProjectInput.setAttribute('id', 'item_project');
@@ -449,12 +522,14 @@ const todoListApp = (() => {
         addProjectSubmitHandler,
         initializeStorage,
         renderProjectsList,
+        renderItemsList,
     }
 })();
 
 
 todoListApp.initializeStorage();
 todoListApp.renderProjectsList();
+todoListApp.renderItemsList();
 todoListApp.bindToDoListAppButtonEventHandlers();
 
 
