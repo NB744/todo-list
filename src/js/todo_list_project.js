@@ -8,7 +8,9 @@ export const todoProject = (() => {
         let projects = getProjectsObj();
         projects[`project_${nextProjectId}`] = {id: nextProjectId, title, description, items: {}};
         localStorage.setItem("projects", JSON.stringify(projects));
+        localStorage.setItem("currentProjectId", JSON.stringify(nextProjectId));
         return `project_${nextProjectId}`;
+        
     }
 
     function updateProject(id, title, description){
@@ -26,8 +28,11 @@ export const todoProject = (() => {
         return project.id;
     }
 
+    function getCurrentProjectId(){
+        return parseInt(JSON.parse(localStorage.getItem("currentProjectId")));
+    }
     function getNextProjectId(){
-        return projectId++;
+        return getCurrentProjectId() + 1;
     }
 
     function getProjectItems(project){
@@ -77,5 +82,6 @@ export const todoProject = (() => {
         addItemToProject,
         getProjectObj,
         updateProject,
+        getCurrentProjectId,
     }
 })();

@@ -10,6 +10,7 @@ export const todoItem = (() => {
         let items = getItemsObj();
         items[`item_${nextItemId}`] = {id: nextItemId, title, description, dueDate, priority, notes};
         localStorage.setItem("items", JSON.stringify(items));
+        localStorage.setItem("currentItemId", JSON.stringify(nextItemId));
         return `item_${nextItemId}`;
     }
 
@@ -80,7 +81,11 @@ export const todoItem = (() => {
     }
 
     function getNextItemId(){
-        return itemId++;
+        return getCurrentItemId() + 1;
+    }
+
+    function getCurrentItemId(){
+        return parseInt(JSON.parse(localStorage.getItem("currentItemId")));
     }
 
     function deleteItem(itemId){
@@ -97,6 +102,7 @@ export const todoItem = (() => {
         deleteItem,
         getAllPriorities,
         updateItem,
+        getCurrentItemId,
     }
 })();
 

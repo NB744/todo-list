@@ -1,5 +1,6 @@
 import { todo_list_item, todoItem } from "./todo_list_item";
 import { todo_list_project, todoProject } from "./todo_list_project";
+import "../css/todolist.css";
 
 console.log("TODO LIST");
 // console.log(todo_list_item);
@@ -10,6 +11,8 @@ console.log("TODO LIST");
 
 let allItems = {};
 let allProjects = {};
+let initItemId = 0;
+let initProjectId = 0;
  
 const todoListApp = (() => {
     
@@ -116,7 +119,8 @@ const todoListApp = (() => {
             }
 
             const itemClickTarget = e.target.closest("#items-list-ul");
-            if(itemClickTarget){
+            const itemViewTarget = e.target.closest('#view-item-btn');
+            if(itemClickTarget || itemViewTarget){
                 console.log("Item Clicked");
                 let clickedItemId = e.target.getAttribute("data-item-key");
                 console.log(clickedItemId);
@@ -252,9 +256,6 @@ const todoListApp = (() => {
 
             renderBodyDiv.appendChild(projectDescDiv);
 
-            let projectItemsDiv = document.createElement("div");
-            projectItemsDiv.classList.add('object-render-element-div');
-
             let eachProjectActionContainer = document.createElement("div");
             eachProjectActionContainer.classList.add("each-project-action-container");
             
@@ -278,7 +279,7 @@ const todoListApp = (() => {
             console.log(allItemsInThisProject);
             if(Object.keys(allItemsInThisProject).length){
                 let allItems = getAllItems();
-                for(let eachItemInThisProject in allItems){
+                for(let eachItemInThisProject in allItemsInThisProject){
                     console.log("HERE");
                     console.log(eachItemInThisProject);
                     let eachItemInThisProjectObj = allItems[eachItemInThisProject];
@@ -287,6 +288,10 @@ const todoListApp = (() => {
                     let eachItemInThisProjectDesc = eachItemInThisProjectObj.description;
                     let eachItemInThisProjectDueDate = eachItemInThisProjectObj.dueDate;
                     let eachItemInThisProjectPriority = eachItemInThisProjectObj.priority;
+
+                    let projectItemsDiv = document.createElement("div");
+                    projectItemsDiv.classList.add('object-render-element-div');
+                    projectItemsDiv.classList.add('project-item-wrapper');
                     
                     let eachItemInThisProjectDiv = document.createElement("div");
                     eachItemInThisProjectDiv.classList.add('object-render-element-div');
@@ -312,15 +317,40 @@ const todoListApp = (() => {
                     eachItemInThisProjectPriorityDiv.textContent = eachItemInThisProjectPriority;
 
                     eachItemInThisProjectDiv.appendChild(eachItemInThisProjectPriorityDiv);
-                    console.log(eachItemInThisProjectDiv);
+
+                    let eachItemInProjectActionDiv = document.createElement("div");
+                    eachItemInProjectActionDiv.classList.add('project-item-actions');
+                    
+                    let eachItemInProjectViewItemBtn = document.createElement("button");
+                    eachItemInProjectViewItemBtn.setAttribute('id', 'view-item-btn');
+                    eachItemInProjectViewItemBtn.setAttribute('data-item-key', eachItemInThisProject);
+                    eachItemInProjectViewItemBtn.textContent = 'View Item Details';
+
+
+                    let eachItemInProjectDeleteItemBtn = document.createElement("button");
+                    eachItemInProjectDeleteItemBtn.setAttribute('id', 'delete-item-btn');
+                    eachItemInProjectDeleteItemBtn.setAttribute('data-item-id', eachItemInThisProject);
+                    eachItemInProjectDeleteItemBtn.textContent = 'Delete Item';
+
+                    eachItemInProjectActionDiv.appendChild(eachItemInProjectViewItemBtn);
+                    eachItemInProjectActionDiv.appendChild(eachItemInProjectDeleteItemBtn);
+                    
+                    //console.log(eachItemInThisProjectDiv);
                     projectItemsDiv.appendChild(eachItemInThisProjectDiv);
+                    let hrElem = document.createElement("hr");
+                    projectItemsDiv.appendChild(hrElem);
+                    projectItemsDiv.appendChild(eachItemInProjectActionDiv);
                     console.log(projectItemsDiv);
+                    renderBodyDiv.appendChild(projectItemsDiv);
                 }
             }else{
+                let projectItemsDiv = document.createElement("div");
+                projectItemsDiv.classList.add('object-render-element-div');
+                projectItemsDiv.classList.add('project-item-wrapper');
                 projectItemsDiv.textContent = "No Items in this project";
+                renderBodyDiv.appendChild(projectItemsDiv);
             }
 
-            renderBodyDiv.appendChild(projectItemsDiv);
             projectHeaderDetailsDiv.appendChild(eachProjectActionContainer);
             renderHeaderDiv.appendChild(projectHeaderDetailsDiv);
         }
@@ -350,19 +380,24 @@ const todoListApp = (() => {
             for(let eachItem in items){
                 const eachItemObj = items[eachItem];
                 let eachItemListElem = document.createElement("li");
-                //let eachItemDiv = document.createElement("div");
-                //eachItemDiv.classList.add("each-item-list-container");
+                let eachItemPriorityDiv = document.createElement("div");
                 //console.log(eachItemObj);
 
                 const eachItemId = eachItemObj.id;
                 const eachItemName = eachItemObj.title;
+                const eachItemPriority = eachItemObj.priority;
                 //console.log(eachItemName);
 
-                eachItemListElem.textContent = eachItemName;
+                eachItemPriorityDiv.classList.add(`item-priority-${eachItemPriority}`);
+                eachItemPriorityDiv.classList.add('item-priority-dot')
+
+                eachItemListElem.innerHTML = '';
+                eachItemListElem.appendChild(eachItemPriorityDiv);
+                eachItemListElem.appendChild(document.createTextNode(eachItemName));
                 eachItemListElem.setAttribute('id', `item-${eachItemId}`);
                 eachItemListElem.setAttribute('data-item-key', eachItem);
-
-                itemsListElem.appendChild(eachItemListElem);
+                
+                itemsListElem.appendChild(eachItemListElem);                
             }
             return itemsListElem;
         }else{
@@ -734,8 +769,25 @@ const todoListApp = (() => {
     }
 
     function initializeStorage(){
-        localStorage.setItem("items", JSON.stringify(allItems));
-        localStorage.setItem("projects", JSON.stringify(allProjects));
+        let currentItems = JSON.parse(localStorage.getItem("items"));
+        let currentProjects = JSON.parse(localStorage.getItem("projects"));
+        let currentProjectId = JSON.parse(localStorage.getItem("currentProjectId"));
+        let currentItemId = JSON.parse(localStorage.getItem("currentItemId"));
+        if(currentItems === null ){
+            localStorage.setItem("items", JSON.stringify(allItems));
+        }
+
+        if(currentProjects === null){
+            localStorage.setItem("projects", JSON.stringify(allProjects));
+        }
+
+        if(currentProjectId === null){
+            localStorage.setItem("currentProjectId", JSON.stringify(initProjectId));
+        }
+
+        if(currentItemId === null){
+            localStorage.setItem("currentItemId", JSON.stringify(initItemId));
+        }
     }
 
     function getAllProjects(){
@@ -761,8 +813,9 @@ todoListApp.initializeStorage();
 todoListApp.renderProjectsList();
 todoListApp.renderItemsList();
 todoListApp.bindToDoListAppButtonEventHandlers();
-
-
+let currProjectId = todoProject.getCurrentProjectId();
+let currItemId = todoProject.getCurrentProjectId();
+console.log(`current Pid: ${currProjectId}, IID: ${currItemId}`);
 
 
 // let nis1 = todoItem.createItem("Nischal Test Item 1", "This is a test", "06-26-2025", "high", "This is a test Note");
