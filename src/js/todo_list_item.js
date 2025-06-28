@@ -91,10 +91,7 @@ export const todoItem = (() => {
     function deleteItem(itemId){
         let items = JSON.parse(localStorage.getItem("items"));
         delete items[itemId];
-        console.log(items);
         localStorage.setItem("items", JSON.stringify(items));
-        // Also, update any projects where this item is listed.
-        console.log(`Deleted Item ${itemId}`);
     }
 
     return {

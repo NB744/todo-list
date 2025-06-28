@@ -407,7 +407,7 @@ button.delete-project-btn:hover {
 }
 
 /* Left info block */
-.render-header-container > div:first-child {
+.render-header-container > .item-details-header-div:first-child {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
