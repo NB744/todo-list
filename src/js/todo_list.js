@@ -462,31 +462,33 @@ const todoListApp = (() => {
         let itemDueDate = document.getElementById("item_due_date").value;
         let itemPriority = document.getElementById("item_priority").value;
         let itemNotes = document.getElementById("item_notes").value;
-        let itemProject = document.getElementById("item_project").value;
+        let itemProjectElem = document.getElementById("item_project");
         // Update Item.
         todoItem.updateItem(itemId, itemName,itemDesc,itemDueDate,itemPriority,itemNotes);
         
-        let updatedProject = false;
-        //Also, update the item's project.
-        let itemCurrentProject = getProjectOfItem(`item_${itemId}`);
-        let allProjects = getAllProjects();
-        //Remove from old project
-        if(itemCurrentProject){
-            delete allProjects[itemCurrentProject].items[`item_${itemId}`];   
-            updatedProject = true;
-        }
-        //Add to new project.
-        if(itemProject){
-            allProjects[itemProject].items[`item_${itemId}`] = `item_${itemId}`;
-            updatedProject = true;
-        }
-        
-        if(updatedProject){
-            //Update storage.
-            localStorage.setItem("projects", JSON.stringify(allProjects));
-        }
+        if(itemProjectElem !== null){
+            let itemProject = document.getElementById("item_project").value;
+            console.log(itemProject);
+            let updatedProject = false;
+            //Also, update the item's project.
+            let itemCurrentProject = getProjectOfItem(`item_${itemId}`);
+            let allProjects = getAllProjects();
+            //Remove from old project
+            if(itemCurrentProject){
+                delete allProjects[itemCurrentProject].items[`item_${itemId}`];   
+                updatedProject = true;
+            }
+            //Add to new project.
+            if(itemProject){
+                allProjects[itemProject].items[`item_${itemId}`] = `item_${itemId}`;
+                updatedProject = true;
+            }
             
-        
+            if(updatedProject){
+                //Update storage.
+                localStorage.setItem("projects", JSON.stringify(allProjects));
+            }
+        }
         // Add message.
         displayMessage(`Success! Updated item ${itemName}`);
     }
